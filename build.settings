@@ -1,0 +1,33 @@
+settings =
+{
+	orientation =
+	{
+		default = "landscapeRight",
+		supported =
+        {
+            "landscapeRight", "landscapeLeft"
+        }
+	},
+	
+	iphone =
+	{
+		plist=
+		{
+			CFBundleIconFile = "Icon.png",
+			CFBundleIconFiles = 
+			{
+				"Icon.png",
+				"Icon@2x.png",
+			},
+			CFBundleDisplayName = "Snuggle",
+			UIStatusBarHidden = true,
+			UIPrerenderedIcon = true,
+			UIApplicationExitsOnSuspend = false,
+		},
+	},
+	
+	android =
+	{
+		versionCode = "1"
+	},
+}
