@@ -4,7 +4,7 @@ local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
 local onTouch, createPlayers
-local playerNumber01, playerNumber02, playerNumber03, playerNumber04, playerNumber05
+local playerNumbersSheet, playerNumber01, playerNumber02, playerNumber03, playerNumber04, playerNumber05
 
 function scene:createScene( event )
 	local group = self.view
@@ -14,7 +14,7 @@ function scene:createScene( event )
 
 	group:insert( playerSelectText )
 
-	local playerNumbersSheet = sprite.newSpriteSheetFromData( "textures/playerNumbers".._G.filenameSuffix..".png", 
+	playerNumbersSheet = sprite.newSpriteSheetFromData( "textures/playerNumbers".._G.filenameSuffix..".png", 
 							require( "textures.playerNumbers".._G.filenameSuffix ).getSpriteSheetData() )
 	
 	local playerNumbers01Set = sprite.newSpriteSet( playerNumbersSheet, 1, 1 )
@@ -114,6 +114,10 @@ createPlayers = function( numberOfPlayers )
 	for i = 1, numberOfPlayers do
 		table.insert( storyboard.players, require( "player" ).new( i ))
 	end
+
+	storyboard.currentRound = 1
+
+	storyboard.gotoScene( "scenes.round" )
 end
 
 scene:addEventListener( "createScene", scene )
