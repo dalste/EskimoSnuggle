@@ -3,7 +3,7 @@ local utility = require "utility"
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
-local onTouch
+local onTouch, createPlayers
 local playerNumber01, playerNumber02, playerNumber03, playerNumber04, playerNumber05
 
 function scene:createScene( event )
@@ -28,6 +28,7 @@ function scene:createScene( event )
 	playerNumber01.yScale = _G.spriteScale
 	playerNumber01.x = ( display.contentWidth / 2 ) - ( 2 * playerNumber01.contentWidth ) - 20
 	playerNumber01.y = display.contentHeight * ( 2 / 3 )
+	playerNumber01.value = 1
 	group:insert( playerNumber01 )
 
 	playerNumber02 = sprite.newSprite( playerNumbers02Set )
@@ -35,6 +36,7 @@ function scene:createScene( event )
 	playerNumber02.yScale = _G.spriteScale
 	playerNumber02.x = ( display.contentWidth / 2 ) - playerNumber02.contentWidth - 10
 	playerNumber02.y = display.contentHeight * ( 2 / 3 )
+	playerNumber02.value = 2
 	group:insert( playerNumber02 )
 
 	playerNumber03 = sprite.newSprite( playerNumbers03Set )
@@ -42,6 +44,7 @@ function scene:createScene( event )
 	playerNumber03.yScale = _G.spriteScale
 	playerNumber03.x = display.contentWidth / 2
 	playerNumber03.y = display.contentHeight * ( 2 / 3 )
+	playerNumber03.value = 3
 	group:insert( playerNumber03 )
 
 	playerNumber04 = sprite.newSprite( playerNumbers04Set )
@@ -49,6 +52,7 @@ function scene:createScene( event )
 	playerNumber04.yScale = _G.spriteScale
 	playerNumber04.x = ( display.contentWidth / 2 ) + playerNumber04.contentWidth + 10
 	playerNumber04.y = display.contentHeight * ( 2 / 3 )
+	playerNumber04.value = 4
 	group:insert( playerNumber04 )
 
 	playerNumber05 = sprite.newSprite( playerNumbers05Set )
@@ -56,6 +60,7 @@ function scene:createScene( event )
 	playerNumber05.yScale = _G.spriteScale
 	playerNumber05.x = ( display.contentWidth / 2 ) + ( 2 * playerNumber04.contentWidth ) + 20
 	playerNumber05.y = display.contentHeight * ( 2 / 3 )
+	playerNumber05.value = 5
 	group:insert( playerNumber05 )
 end
 
@@ -98,9 +103,17 @@ onTouch = function( event )
         event.target.yScale = _G.spriteScale
         display.getCurrentStage():setFocus( nil )
         if utility.isPointInside( event.target, event.x, event.y ) then
-        	print( "TRIGGERED" )
+        	createPlayers( event.target.value )
     	end
     end
+end
+
+createPlayers = function( numberOfPlayers )
+	storyboard.players = {}
+
+	for i = 1, numberOfPlayers do
+		table.insert( storyboard.players, require( "player" ).new( i ))
+	end
 end
 
 scene:addEventListener( "createScene", scene )
