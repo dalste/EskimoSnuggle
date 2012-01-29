@@ -2,12 +2,13 @@ local sprite = require "sprite"
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
-local feedbackFlashCount, currentState, styleIndex
+local flashFeedbackCount, flashFeedbackTransition, currentState, styleIndex
 local onEnterFrame, onAccelerometer, onGyro
 
 local roundNumberText, verbText, styleText, hintText
 local feedbackGroup, feedbackLeftText, feedbackRightText, exclamationLeftText, exclamationRightText
-local prepareChallenge, startChallenge, updateChallenge, flashFeedback, postFlashFeedback
+local prepareChallenge, winChallenge, loseChallenge, flashFeedback, postFlashFeedback
+local winChallengeTimer
 
 local currentAccel, currentGyro, threshold
 
@@ -48,8 +49,6 @@ function scene:createScene( event )
 	local group = self.view
 
 	roundNumberText = display.newRetinaText( "Round "..storyboard.currentRound, 0, 0, "Cubano", 24 )
-	roundNumberText.x = display.contentWidth / 2
-	roundNumberText.y = 0 - roundNumberText.contentHeight
 	roundNumberText:setTextColor( 65, 132, 187 )
 	group:insert( roundNumberText )
 
@@ -94,11 +93,16 @@ end
 
 function scene:enterScene( event )
 	currentState = 0
-	feedbackFlashCount = 3
+	flashFeedbackCount = 3
 	currentAccel = 0
 	currentGyro = 0
 	threshold = 0
 	previousTime = system.getTimer()
+
+	roundNumberText.x = display.contentWidth / 2
+	roundNumberText.y = 0 - roundNumberText.contentHeight
+
+	feedbackGroup.alpha = 0
 
 	transition.to( roundNumberText, { y = ( display.contentHeight * ( 1 / 8 )), time = 1000, transition = easing.inOutExpo, onComplete = prepareChallenge })
 
@@ -106,7 +110,12 @@ function scene:enterScene( event )
 end
 
 function scene:exitScene( event )
+	if winChallengeTimer ~= nil then timer.cancel( winChallengeTimer ) end
+	if flashFeedbackTransition ~= nil then transition.cancel( flashFeedbackTransition ) end
+	
 	Runtime:removeEventListener( "enterFrame", onEnterFrame )
+	Runtime:removeEventListener( "accelerometer", onAccelerometer )
+	Runtime:removeEventListener( "gyroscope", onGyro )
 end
 
 function scene:destroyScene( event )
@@ -117,16 +126,28 @@ onEnterFrame = function( event )
 	local dt = ( event.time - previousTime ) / 1000
 	previousTime = event.time
 	
-	if currentState == 0 and feedbackFlashCount == 0 then
+	if currentState == 0 and flashFeedbackCount <= 0 then
 		currentState = 1
 		flashFeedbackCount = 1
 		feedbackLeftText.text = "Go"
 		feedbackRightText.text = "Go"
 		flashFeedback( feedbackGroup )
-	elseif currentState == 1 then
+	elseif currentState == 1 and flashFeedbackCount <= 0 then
 		currentState = 2
 		previousOffence = event.time
-		local ultimote = require "Ultimote"; ultimote.connect();
+
+		if styleIndex == 1 then -- MAXIMIZE
+			feedbackLeftText.text = "Faster"
+			feedbackRightText.text = "Faster"
+		elseif styleIndex == 2 then -- MINIMIZE
+			feedbackLeftText.text = "Slower"
+			feedbackRightText.text = "Slower"
+		end
+		
+		--local ultimote = require "Ultimote"; ultimote.connect();
+		
+		winChallengeTimer = timer.performWithDelay( 18000, winChallenge )
+
 		Runtime:addEventListener( "accelerometer", onAccelerometer )
 		Runtime:addEventListener( "gyroscope", onGyro )
 	elseif currentState == 2 then
@@ -135,27 +156,45 @@ onEnterFrame = function( event )
 
 		if styleIndex == 1 then -- MAXIMIZE
 			local scalarMovement = ( currentAccel / 0.6 ) + ( currentGyro / 12.5 )
-			print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			
+			--print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			
 			if scalarMovement <= 1.0 then
+				if flashFeedbackCount <= 0 then
+					flashFeedbackCount = 1
+					flashFeedback( feedbackGroup )
+				end
+
 				local punishment = 25 * ( ( event.time - previousOffence ) / 1000 )
 				if punishment > 25 then punishment = 25 end
 				threshold = threshold + punishment
 				previousOffence = event.time
-				print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
+				
+				--print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
 			end
 		elseif styleIndex == 2 then -- MINIMIZE
 			local scalarMovement = ( currentAccel / 0.6 ) + ( currentGyro / 12.5 )
-			print( "MINIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			
+			--print( "MINIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			
 			if scalarMovement >= 1.0 then
+				if flashFeedbackCount <= 0 then
+					flashFeedbackCount = 1
+					flashFeedback( feedbackGroup )
+				end
+
 				local punishment = 25 * ( ( event.time - previousOffence ) / 1000 )
 				if punishment > 25 then punishment = 25 end
 				threshold = threshold + punishment
 				previousOffence = event.time
-				print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
+				
+				--print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
 			end
 		end
 
-		if threshold >= 100 then print ("~~~~~~~~~~~~~~~~~~~~~~~~~~ROUND OVER"); threshold = 0 end
+		if threshold >= 100 then
+			loseChallenge()
+		end
 	end
 end
 
@@ -171,20 +210,22 @@ prepareChallenge = function()
 	verbText.text = verbs[ math.random( 1, #verbs )]
 	verbText.x = display.contentWidth / 2
 	verbText.y = 0 - verbText.contentHeight
+	verbText.alpha = 1
 
-	styleIndex = math.random( 1, #styles )
+	styleIndex = 1 --math.random( 1, #styles )
 	
 	styleText.text = styles[ styleIndex ]
 	styleText.x = display.contentWidth / 2
 	styleText.y = 0 - styleText.contentHeight
+	styleText.alpha = 1
 
 	hintText.text = hints[ styleIndex ]
 	hintText.x = display.contentWidth / 2
 	hintText.y = 0 - styleText.contentHeight
+	hintText.alpha = 1
 
 	transition.to( roundNumberText, { y = 0 - roundNumberText.contentHeight, time = 1000, transition = easing.inOutExpo })
 	
-	--transition.to( bubbleSprite, { y = display.contentHeight / 4, time = 1000, transition = easing.inOutExpo })
 	transition.to( verbText, { y = display.contentHeight / 8, time = 1000, delay = 200, transition = easing.inOutExpo })
 	transition.to( styleText, { y = display.contentHeight / 4, time = 1000, delay = 400, transition = easing.inOutExpo })
 	transition.to( hintText, { y = display.contentHeight / 2.75, time = 1000, delay = 600, transition = easing.inOutExpo })
@@ -192,22 +233,34 @@ prepareChallenge = function()
 	flashFeedback( feedbackGroup )
 end
 
-startChallenge = function()
+winChallenge = function()
+	currentState = 3
 	system.vibrate()
+
+	transition.to( verbText, { alpha = 0, time = 500 })
+	transition.to( styleText, { alpha = 0, time = 500, delay = 200 })
+	transition.to( hintText, { alpha = 0, time = 500, delay = 400, onComplete = function() print("WON") end })
 end
 
-updateChallenge = function()
+loseChallenge = function()
+	currentState = 3
+	system.vibrate()
+
+	transition.to( verbText, { alpha = 0, time = 500 })
+	transition.to( styleText, { alpha = 0, time = 500, delay = 200 })
+	transition.to( hintText, { alpha = 0, time = 500, delay = 400, onComplete = function() storyboard.gotoScene( "scenes.frostbitten" ) end })
 end
 
 flashFeedback = function( obj )
 	obj.alpha = 1.0
-	transition.to( obj, { alpha = 0, time = 2000, transition = easing.inExpo, onComplete = postFlashFeedback })
+	system.vibrate()
+	flashFeedbackTransition = transition.to( obj, { alpha = 0, time = 2000, transition = easing.inExpo, onComplete = postFlashFeedback })
 end
 
 postFlashFeedback = function( obj )
-	feedbackFlashCount = feedbackFlashCount - 1
+	flashFeedbackCount = flashFeedbackCount - 1
 
-	if feedbackFlashCount > 0 then
+	if flashFeedbackCount > 0 then
 		flashFeedback( obj )
 	end
 end

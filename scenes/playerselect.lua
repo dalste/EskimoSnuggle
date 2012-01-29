@@ -118,6 +118,13 @@ onTouch = function( event )
 end
 
 createPlayers = function( numberOfPlayers )
+	if storyboard.players ~= nil then
+		for i = 1, #storyboard.players do
+			storyboard.players[i]:destroy()
+		end
+	end
+
+	storyboard.players = nil
 	storyboard.players = {}
 
 	for i = 1, numberOfPlayers do
@@ -125,7 +132,7 @@ createPlayers = function( numberOfPlayers )
 	end
 
 	storyboard.currentRound = 1
-	storyboard.gotoScene( "scenes.round" ) 
+	storyboard.gotoScene( "scenes.frostbitten" ) 
 
 	--[[
 	transition.to( playerSelectText, { y = ( 0 - playerSelectText.contentHeight ), time = 1000, transition = easing.inOutExpo })

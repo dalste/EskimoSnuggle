@@ -15,15 +15,11 @@ function scene:createScene( event )
 	titleSprite = sprite.newSprite( sprite.newSpriteSet( environmentSheet, 9, 1 ))
 	titleSprite.xScale = _G.spriteScale
 	titleSprite.yScale = _G.spriteScale
-	titleSprite.x = display.contentWidth / 2
-	titleSprite.y = 0 - titleSprite.contentHeight
 
 	shakeSprite = sprite.newSprite( sprite.newSpriteSet( environmentSheet, 7, 1 ))
 	shakeSprite.xScale = _G.spriteScale
 	shakeSprite.yScale = _G.spriteScale
-	shakeSprite.x = display.contentWidth / 2
-	shakeSprite.y = display.contentHeight / 2 - 25
-	shakeSprite.alpha = 0
+	
 
 	group:insert( titleSprite )
 	group:insert( shakeSprite )
@@ -31,6 +27,15 @@ end
 
 function scene:enterScene( event )
 	exiting = false
+
+	titleSprite.x = display.contentWidth / 2
+	titleSprite.y = 0 - titleSprite.contentHeight
+	titleSprite.alpha = 1
+
+	shakeSprite.x = display.contentWidth / 2
+	shakeSprite.y = display.contentHeight / 2 - 25
+	shakeSprite.alpha = 0
+
 	titleTransition = transition.to( titleSprite, { y = ( display.contentHeight * ( 1 / 5 )), time = 1000, transition = easing.inOutExpo })
 	transition.to( shakeSprite, { alpha = 1.0, time = 1000, delay = 1000 })
 	wiggleUp( shakeSprite )
