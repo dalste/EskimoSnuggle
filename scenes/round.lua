@@ -23,7 +23,6 @@ local verbs =
 	"Hop",
 	"Jump",
 	"Leapfrog",
-	"Push-up",
 	"Roll",
 	"Run",
 	"Skip",

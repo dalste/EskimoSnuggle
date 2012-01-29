@@ -1,8 +1,8 @@
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
-local frostbittenText, limbText
-local dismemberPlayers, processPlayer, playerProcessed, onNextRound, onGameOver
+local frostbittenText, limbText, limbTextTransition
+local dismemberPlayers, processPlayer, playerProcessed, onNextRound, onGameOver, onTap
 local playersToDismember, playerIndex
 
 function scene:createScene( event )
@@ -34,6 +34,8 @@ end
 
 function scene:exitScene( event )
 	playersToDismember = nil
+	if limbTextTransition ~= nil then transition.cancel( limbTextTransition ) end
+	Runtime:removeEventListener( "tap", onTap )
 end
 
 function scene:destroyScene( event )
@@ -59,23 +61,13 @@ dismemberPlayers = function()
 	end
 
 	definitelyAlive = nil
+	readyToProcessPlayer = true
 
-	processPlayer()
+	Runtime:addEventListener( "tap", onTap )
 end
 
-processPlayer = function()
-	local limb = storyboard.players[ playersToDismember[ playerIndex ] ]:removeLimb()
-	limbText.text = "Eskimo "..( playersToDismember[ playerIndex ] ).." Lost "..limb
-	transition.to( limbText, { alpha = 1, time = 500, delay = 1000, onComplete = 
-					function( obj ) transition.to( obj, { alpha = 0, time = 500, delay = 3000, onComplete = playerProcessed }) end })
-end
-
-playerProcessed = function( obj )
-	playerIndex = playerIndex + 1
-
-	if playerIndex <= #playersToDismember then
-		processPlayer()
-	else
+onTap = function( event )
+	if playerIndex > #playersToDismember then
 		local numberOfDeadPlayers = 0
 
 		for i = 1, #storyboard.players do
@@ -89,14 +81,29 @@ playerProcessed = function( obj )
 		else
 			onNextRound()
 		end
+	else
+		processPlayer()
 	end
 end
 
+processPlayer = function()
+	if limbTextTransition ~= nil then transition.cancel( limbTextTransition ) end
+	limbText.alpha = 0
+
+	local limb = storyboard.players[ playersToDismember[ playerIndex ] ]:removeLimb()
+	limbText.text = "Eskimo "..( playersToDismember[ playerIndex ] ).." Lost "..limb
+	limbTextTransition = transition.to( limbText, { alpha = 1, time = 500, delay = 1000, onComplete = 
+							function( obj ) transition.to( obj, { alpha = 0, time = 500, delay = 3000 }) end })
+	playerIndex = playerIndex + 1
+end
+
 onNextRound = function()
+	Runtime:removeEventListener( "tap", onTap )
 	transition.to( frostbittenText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.round" ) end })
 end
 
 onGameOver = function()
+	Runtime:removeEventListener( "tap", onTap )
 	transition.to( frostbittenText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.gameover" ) end })
 end
 
