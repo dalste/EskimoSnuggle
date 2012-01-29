@@ -20,7 +20,7 @@ local screen =
 
 audio.reserveChannels( 1 )
 local backgroundMusic = audio.loadSound( "audio/partyDog.mp3" )
---local backgroundMusicChannel = audio.play( backgroundMusic, { channel = 1, loops = -1 }  )
+local backgroundMusicChannel = audio.play( backgroundMusic, { channel = 1, loops = -1 }  )
 audio.setVolume( 0.3, 1 )
 
 local function startGame()
@@ -28,7 +28,12 @@ local function startGame()
 	
 	storyboard.tapSFX = audio.loadSound( "audio/tap.wav" )
 	storyboard.warningSFX = audio.loadSound( "audio/warning.wav" )
-	audio.play( storyboard.warningSFX )
+	storyboard.winSFX = audio.loadSound( "audio/win.wav" )
+	storyboard.loseSFX = audio.loadSound( "audio/lose.wav" )
+	storyboard.weakenedSFX = audio.loadSound( "audio/weakened.wav" )
+	storyboard.newRoundSFX = audio.loadSound( "audio/newRound.wav" )
+	storyboard.countdownSFX = audio.loadSound( "audio/countdown.wav" )
+	storyboard.goSFX = audio.loadSound( "audio/go.wav" )
 
 	storyboard.gotoScene( "scenes.title" )
 end

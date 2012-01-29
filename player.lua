@@ -4,6 +4,8 @@ local player_mt = { __index = player }
 local playersSheet = sprite.newSpriteSheetFromData( "textures/players".._G.filenameSuffix..".png", 
 							require( "textures.players".._G.filenameSuffix ).getSpriteSheetData() )
 
+local storyboard = require "storyboard"
+
 function player.new( playerNumber )
 	local newPlayer = {}
 
@@ -99,6 +101,8 @@ function player:removeLimb()
 
 	self.weakened.alpha = 1
 	transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
+
+	audio.play( storyboard.weakenedSFX )
 	
 	if( self.numberOfLimbs <= 0) then
 		transition.dissolve( self.group, self.skull, 1000, 0 )
@@ -136,6 +140,8 @@ function player:restoreLimb()
 		transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
 		return "Left Leg"
 	end
+
+	audio.play( storyboard.weakenedSFX )
 end
 
 function player:destroy()

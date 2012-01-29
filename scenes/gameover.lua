@@ -25,6 +25,8 @@ function scene:enterScene( event )
 	scoreText.y = 0 - scoreText.contentHeight
 	scoreText.alpha = 1
 
+	audio.play( storyboard.loseSFX )
+
 	transition.to( gameOverText, { y = display.contentHeight / 8, time = 1000, transition = easing.inOutExpo })
 	transition.to( scoreText, { y = display.contentHeight / 4, time = 1000, delay = 200, transition = easing.inOutExpo, onComplete = onGameOver })
 end

@@ -242,6 +242,7 @@ prepareChallenge = function()
 	hintText.y = 0 - styleText.contentHeight
 	hintText.alpha = 1
 
+	audio.play( storyboard.newRoundSFX )
 	transition.to( roundNumberText, { y = 0 - roundNumberText.contentHeight, time = 1000, transition = easing.inOutExpo })
 	
 	transition.to( verbText, { y = display.contentHeight / 8, time = 1000, delay = 200, transition = easing.inOutExpo })
@@ -254,6 +255,7 @@ end
 winChallenge = function()
 	currentState = 3
 	system.vibrate()
+	audio.play( storyboard.winSFX )
 
 	transition.to( verbText, { alpha = 0, time = 500 })
 	transition.to( styleText, { alpha = 0, time = 500, delay = 200 })
@@ -263,6 +265,7 @@ end
 loseChallenge = function()
 	currentState = 3
 	system.vibrate()
+	audio.play( storyboard.loseSFX )
 
 	transition.to( verbText, { alpha = 0, time = 500 })
 	transition.to( styleText, { alpha = 0, time = 500, delay = 200 })
@@ -271,7 +274,16 @@ end
 
 flashFeedback = function( obj )
 	obj.alpha = 1.0
-	system.vibrate()
+
+	if feedbackLeftText.text == "Faster" or feedbackLeftText.text == "Slower" then
+		audio.play( storyboard.warningSFX )
+		system.vibrate()
+	elseif exclamationLeftText.text == "1" or exclamationLeftText.text == "2" or exclamationLeftText.text == "3" then
+		audio.play( storyboard.countdownSFX )
+	elseif exclamationLeftText.text == "Go" then
+		audio.play( storyboard.goSFX )
+	end
+
 	flashFeedbackTransition = transition.to( obj, { alpha = 0, time = 2000, transition = easing.inExpo, onComplete = postFlashFeedback })
 end
 
