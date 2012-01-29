@@ -173,7 +173,7 @@ onEnterFrame = function( event )
 		if threshold < 0 then threshold = 0 end
 
 		if styleIndex == 1 then -- MAXIMIZE
-			local scalarMovement = ( currentAccel / 0.5 ) + ( currentGyro / 10 )
+			local scalarMovement = ( currentAccel / 0.5 ) + ( currentGyro / 7.0 )
 			
 			--print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
 			

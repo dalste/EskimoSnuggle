@@ -36,8 +36,8 @@ function scene:enterScene( event )
 
 	Runtime:addEventListener( "tap", onTap )
 
-	mainTextTransition = transition.to( tutorialMainText, { y = display.contentHeight / 5, time = 1000, transition = easing.inOutExpo })
-	mainTextTransition2 = transition.to( tutorialMainText2, { y = display.contentHeight / 4, time = 1000, transition = easing.inOutExpo })
+	mainTextTransition = transition.to( tutorialMainText, { y = display.contentHeight / 7, time = 1000, transition = easing.inOutExpo })
+	mainTextTransition2 = transition.to( tutorialMainText2, { y = display.contentHeight / 5, time = 1000, transition = easing.inOutExpo })
 	subTextTransition = transition.to( tutorialSubText, { y = display.contentHeight / 3, time = 1000, delay = 200, transition = easing.inOutExpo })
 end
 
