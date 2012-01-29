@@ -131,8 +131,8 @@ createPlayers = function( numberOfPlayers )
 		table.insert( storyboard.players, require( "player" ).new( i ))
 	end
 
-	storyboard.currentRound = 1
-	storyboard.gotoScene( "scenes.frostbitten" ) 
+	storyboard.currentRound = 0
+	storyboard.gotoScene( "scenes.round" ) 
 
 	--[[
 	transition.to( playerSelectText, { y = ( 0 - playerSelectText.contentHeight ), time = 1000, transition = easing.inOutExpo })

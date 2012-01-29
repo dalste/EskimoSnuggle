@@ -98,11 +98,16 @@ function scene:enterScene( event )
 	currentGyro = 0
 	threshold = 0
 	previousTime = system.getTimer()
+	storyboard.currentRound = storyboard.currentRound + 1
 
+	roundNumberText.text = "Round "..storyboard.currentRound
 	roundNumberText.x = display.contentWidth / 2
 	roundNumberText.y = 0 - roundNumberText.contentHeight
 
 	feedbackGroup.alpha = 0
+
+	feedbackLeftText.text = "Get Ready"
+	feedbackRightText.text = "Get Ready"
 
 	transition.to( roundNumberText, { y = ( display.contentHeight * ( 1 / 8 )), time = 1000, transition = easing.inOutExpo, onComplete = prepareChallenge })
 
@@ -126,11 +131,22 @@ onEnterFrame = function( event )
 	local dt = ( event.time - previousTime ) / 1000
 	previousTime = event.time
 	
-	if currentState == 0 and flashFeedbackCount <= 0 then
+	if currentState == 0 and flashFeedbackCount == 3 then
+		exclamationLeftText.text = "3"
+		exclamationRightText.text = "3"
+	elseif currentState == 0 and flashFeedbackCount == 2 then
+		exclamationLeftText.text = "2"
+		exclamationRightText.text = "2"
+	elseif currentState == 0 and flashFeedbackCount == 1 then
+		exclamationLeftText.text = "1"
+		exclamationRightText.text = "1"
+	elseif currentState == 0 and flashFeedbackCount <= 0 then
 		currentState = 1
 		flashFeedbackCount = 1
-		feedbackLeftText.text = "Go"
-		feedbackRightText.text = "Go"
+		feedbackLeftText.text = ""
+		feedbackRightText.text = ""
+		exclamationLeftText.text = "Go"
+		exclamationRightText.text = "Go"
 		flashFeedback( feedbackGroup )
 	elseif currentState == 1 and flashFeedbackCount <= 0 then
 		currentState = 2
@@ -143,6 +159,9 @@ onEnterFrame = function( event )
 			feedbackLeftText.text = "Slower"
 			feedbackRightText.text = "Slower"
 		end
+
+		exclamationLeftText.text = "!"
+		exclamationRightText.text = "!"
 		
 		--local ultimote = require "Ultimote"; ultimote.connect();
 		
