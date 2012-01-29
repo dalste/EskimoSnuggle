@@ -4,7 +4,7 @@ local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
 local onTouch, createPlayers
-local playerNumbersSheet, playerNumber01, playerNumber02, playerNumber03, playerNumber04, playerNumber05
+local environmentSheet, playerNumber01, playerNumber02, playerNumber03, playerNumber04, playerNumber05
 
 function scene:createScene( event )
 	local group = self.view
@@ -14,14 +14,14 @@ function scene:createScene( event )
 
 	group:insert( playerSelectText )
 
-	playerNumbersSheet = sprite.newSpriteSheetFromData( "textures/playerNumbers".._G.filenameSuffix..".png", 
-							require( "textures.playerNumbers".._G.filenameSuffix ).getSpriteSheetData() )
+	environmentSheet = sprite.newSpriteSheetFromData( "textures/environment".._G.filenameSuffix..".png", 
+							require( "textures.environment".._G.filenameSuffix ).getSpriteSheetData() )
 	
-	local playerNumbers01Set = sprite.newSpriteSet( playerNumbersSheet, 1, 1 )
-	local playerNumbers02Set = sprite.newSpriteSet( playerNumbersSheet, 2, 1 )
-	local playerNumbers03Set = sprite.newSpriteSet( playerNumbersSheet, 3, 1 )
-	local playerNumbers04Set = sprite.newSpriteSet( playerNumbersSheet, 4, 1 )
-	local playerNumbers05Set = sprite.newSpriteSet( playerNumbersSheet, 5, 1 )
+	local playerNumbers01Set = sprite.newSpriteSet( environmentSheet, 2, 1 )
+	local playerNumbers02Set = sprite.newSpriteSet( environmentSheet, 3, 1 )
+	local playerNumbers03Set = sprite.newSpriteSet( environmentSheet, 4, 1 )
+	local playerNumbers04Set = sprite.newSpriteSet( environmentSheet, 5, 1 )
+	local playerNumbers05Set = sprite.newSpriteSet( environmentSheet, 6, 1 )
 
 	playerNumber01 = sprite.newSprite( playerNumbers01Set )
 	playerNumber01.xScale = _G.spriteScale
@@ -81,7 +81,7 @@ function scene:exitScene( event )
 end
 
 function scene:destroyScene( event )
-	playerNumbersSheet:dispose()
+	environmentSheet:dispose()
 end
 
 onTouch = function( event )

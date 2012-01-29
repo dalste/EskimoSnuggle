@@ -18,8 +18,40 @@ local screen =
 	bottom = display.contentHeight - display.screenOriginY
 };
 
-local fill = display.newRect( screen.left, screen.top, screen.right - screen.left, screen.bottom - screen.top )
-fill:setFillColor( 181, 214, 223 )
+local function startGame()
+	local storyboard = require "storyboard"
+	storyboard.gotoScene( "scenes.title" )
+end
 
-local storyboard = require "storyboard"
-storyboard.gotoScene( "scenes.playerselect" )
+local fill = display.newRect( screen.left, screen.top, screen.right - screen.left, screen.bottom - screen.top )
+fill:setFillColor( 235, 250, 255 )
+
+local sprite = require "sprite"
+
+local environmentSheet = sprite.newSpriteSheetFromData( "textures/environment".._G.filenameSuffix..".png", 
+							require( "textures.environment".._G.filenameSuffix ).getSpriteSheetData() )
+
+local environmentSprite = sprite.newSprite( sprite.newSpriteSet( environmentSheet, 1, 1 ))
+environmentSprite.xScale = _G.spriteScale
+environmentSprite.yScale = _G.spriteScale
+environmentSprite.x = display.contentWidth / 2
+environmentSprite.y = display.contentHeight + environmentSprite.contentHeight
+
+transition.to( environmentSprite, { y = ( display.contentHeight * ( 3 / 4 )), time = 1000, transition = easing.inOutExpo, onComplete = startGame })
+
+
+
+--local ultimote = require "Ultimote"; ultimote.connect();
+
+--[[
+function onShake( event )
+	print( event.yInstant ) --..", "..event.yGravity..", "..event.zGravity.." -- "..event.xInstant..", "..event.yInstant..", "..event.zInstant )
+end
+
+function onGyro( event )
+	print( event.zRotation )
+end
+]]
+
+--Runtime:addEventListener( "accelerometer", onShake )
+--Runtime:addEventListener( "gyroscope", onGyro )
