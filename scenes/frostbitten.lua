@@ -2,7 +2,7 @@ local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
 local frostbittenText
-local dismemberPlayers, onNextRound, onGameOver
+local dismemberPlayers, processPlayer, onNextRound, onGameOver
 
 function scene:createScene( event )
 	local group = self.view
@@ -29,6 +29,7 @@ end
 
 dismemberPlayers = function()
 	local numberOfDeadPlayers = 0
+	local playerIndex = 1
 	local definitelyAlive = {}
 	local dismemberedSomebody = false
 
@@ -37,7 +38,7 @@ dismemberPlayers = function()
 		
 		if coinFlip == 1 and storyboard.players[i].alive == true then
 			print( "PLAYER "..i.." LOST A LIMB")
-			storyboard.players[i]:removeLimb( 1 )
+			print( storyboard.players[i]:removeLimb() )
 			dismemberedSomebody = true
 			-- SAVE LIMB LOCATION AT CURRENT ROUND NUMBER
 		elseif storyboard.players[i].alive == true then
@@ -51,21 +52,25 @@ dismemberPlayers = function()
 
 	if not dismemberedSomebody and #definitelyAlive > 0 then
 		local index = math.random( 1, #definitelyAlive )
-		storyboard.players[index]:removeLimb( 1 )
-		print( "RETROACTIVELY DISMEMBERING PLAYER "..index )
+		print( storyboard.players[ definitelyAlive[index] ]:removeLimb() )
+		print( "RETROACTIVELY DISMEMBERING PLAYER "..definitelyAlive[index] )
 
-		if storyboard.players[index].alive == false then
+		if storyboard.players[ definitelyAlive[index] ].alive == false then
 			numberOfDeadPlayers = numberOfDeadPlayers + 1
 		end
 	end
 
 	dismemberedSomebody = nil
+	definitelyAlive = nil
 
 	if numberOfDeadPlayers >= #storyboard.players then
 		onGameOver()
 	else
 		onNextRound()
 	end
+end
+
+processPlayer = function()
 end
 
 onNextRound = function()
