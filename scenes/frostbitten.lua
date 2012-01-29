@@ -73,6 +73,8 @@ dismemberPlayers = function()
 end
 
 onTap = function( event )
+	audio.play( storyboard.tapSFX )
+
 	if playerIndex > #playersToDismember then
 		local numberOfDeadPlayers = 0
 

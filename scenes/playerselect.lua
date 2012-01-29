@@ -94,6 +94,8 @@ function scene:destroyScene( event )
 end
 
 onTouch = function( event )
+	audio.play( storyboard.tapSFX )
+
 	if event.phase == "began" then
         event.target.xScale = _G.spriteScale * 1.25
         event.target.yScale = _G.spriteScale * 1.25

@@ -4,14 +4,14 @@ local limbBox = ice:loadBox( "limbs" )
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
-local foundLimbText, recipientText, recipientTextTransition, limblessPlayers
+local foundLimbText, recipientText, recipientTextTransition, limbless
 local findLimbless, restoreLimb, onTap
 local limbReattached
 
 function scene:createScene( event )
 	local group = self.view
 
-	foundLimbText = display.newRetinaText( "You Found a Frozen Limb!", 0, 0, "Cubano", 48 )
+	foundLimbText = display.newRetinaText( "You Found A Frozen Limb!", 0, 0, "Cubano", 36 )
 	foundLimbText:setTextColor( 65, 132, 187 )
 	group:insert( foundLimbText )
 
@@ -61,14 +61,17 @@ end
 restoreLimb = function()
 	recipientText.alpha = 0
 
-	local limb = storyboard.players[ limblessPlayers[ math.random( 1, #limblessPlayers ) ] ]:restoreLimb()
-	recipientText.text = "Eskimo "..( playersToDismember[ playerIndex ] ).." Reattached "..limb
+	local playerIndex = math.random( 1, #limblessPlayers )
+	local limb = storyboard.players[ limblessPlayers[ playerIndex ] ]:restoreLimb()
+	recipientText.text = "Eskimo "..( limblessPlayers[ playerIndex ] ).." Reattached "..limb
 	recipientTextTransition = transition.to( recipientText, { alpha = 1, time = 500, delay = 1000, onComplete = 
 							function( obj ) transition.to( obj, { alpha = 0, time = 500, delay = 3000 }) end })
 	limbReattached = true
 end
 
 onTap = function( event )
+	audio.play( storyboard.tapSFX )
+
 	if limbReattached == false then
 		restoreLimb()
 	else

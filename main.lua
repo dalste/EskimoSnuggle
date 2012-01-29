@@ -18,8 +18,18 @@ local screen =
 	bottom = display.contentHeight - display.screenOriginY
 };
 
+audio.reserveChannels( 1 )
+local backgroundMusic = audio.loadSound( "audio/partyDog.mp3" )
+--local backgroundMusicChannel = audio.play( backgroundMusic, { channel = 1, loops = -1 }  )
+audio.setVolume( 0.3, 1 )
+
 local function startGame()
 	local storyboard = require "storyboard"
+	
+	storyboard.tapSFX = audio.loadSound( "audio/tap.wav" )
+	storyboard.warningSFX = audio.loadSound( "audio/warning.wav" )
+	audio.play( storyboard.warningSFX )
+
 	storyboard.gotoScene( "scenes.title" )
 end
 

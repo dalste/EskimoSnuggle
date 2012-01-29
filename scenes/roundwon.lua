@@ -44,6 +44,12 @@ onTap = function( event )
 
 	local frozenLimbs = limbBox:retrieve( ""..storyboard.currentRound )
 
+	if frozenLimbs ~= nil then
+		print( "FROZEN LIMBS: ", frozenLimbs )
+	else
+		print( "NIL ON ROUND "..storyboard.currentRound )
+	end
+
 	if needALimb == true and frozenLimbs ~= nil and frozenLimbs > 0 then
 			transition.to( roundWonText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.foundlimb" ) end })
 	else
