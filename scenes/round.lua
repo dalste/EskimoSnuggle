@@ -231,7 +231,7 @@ prepareChallenge = function()
 	verbText.y = 0 - verbText.contentHeight
 	verbText.alpha = 1
 
-	styleIndex = 1 --math.random( 1, #styles )
+	styleIndex = math.random( 1, #styles )
 	
 	styleText.text = styles[ styleIndex ]
 	styleText.x = display.contentWidth / 2
@@ -258,7 +258,7 @@ winChallenge = function()
 
 	transition.to( verbText, { alpha = 0, time = 500 })
 	transition.to( styleText, { alpha = 0, time = 500, delay = 200 })
-	transition.to( hintText, { alpha = 0, time = 500, delay = 400, onComplete = function() print("WON") end })
+	transition.to( hintText, { alpha = 0, time = 500, delay = 400, onComplete = function() storyboard.gotoScene( "scenes.roundwon" ) end })
 end
 
 loseChallenge = function()

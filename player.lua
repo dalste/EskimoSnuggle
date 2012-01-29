@@ -58,6 +58,12 @@ function player.new( playerNumber )
 	newPlayer.torso.yScale = _G.spriteScale
 	newPlayer.group:insert( newPlayer.torso )
 
+	newPlayer.weakened = sprite.newSprite( sprite.newSpriteSet( playersSheet, 12, 1 ) )
+	newPlayer.weakened.xScale = _G.spriteScale
+	newPlayer.weakened.yScale = _G.spriteScale
+	newPlayer.weakened.alpha = 0
+	newPlayer.group:insert( newPlayer.weakened )
+
 	newPlayer.group.x = ( display.contentWidth / 6 ) * playerNumber
 
 	if playerNumber % 2 == 0 then
@@ -89,17 +95,20 @@ function player:removeLimb()
 	if self.legRight.alpha == 1.0 then table.insert( remainingLimbs, self.legRight ) end
 
 	local severedLimb = remainingLimbs[ math.random( 1, #remainingLimbs ) ]
-	transition.to( severedLimb, { alpha = 0, time = 500 })
+	transition.to( severedLimb, { alpha = 0, time = 500, delay = 500 })
+
+	self.weakened.alpha = 1
+	transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
 	
 	if( self.numberOfLimbs <= 0) then
 		transition.dissolve( self.group, self.skull, 1000, 0 )
 		self.alive = false
 	end
 
-	if severedLimb == self.armLeft then return "Left Arm" end
-	if severedLimb == self.armRight then return "Right Arm" end
-	if severedLimb == self.legLeft then return "Left Leg" end
-	if severedLimb == self.legRight then return "Right Leg" end
+	if severedLimb == self.armLeft then return "Right Arm" end
+	if severedLimb == self.armRight then return "Left Arm" end
+	if severedLimb == self.legLeft then return "Right Leg" end
+	if severedLimb == self.legRight then return "Left Leg" end
 end
 
 function player:destroy()
