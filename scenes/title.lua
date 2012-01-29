@@ -56,7 +56,7 @@ end
 onShake = function( event )
 	if event.isShake == true then
 		audio.play( storyboard.winSFX )
-		transition.to( titleSprite, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.playerselect" ) end })
+		transition.to( titleSprite, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.tutorial01" ) end })
 		transition.to( shakeSprite, { alpha = 0, time = 500 })
 	end
 end

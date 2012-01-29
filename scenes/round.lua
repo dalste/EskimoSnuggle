@@ -108,7 +108,7 @@ function scene:enterScene( event )
 	feedbackLeftText.text = "Get Ready"
 	feedbackRightText.text = "Get Ready"
 
-	transition.to( roundNumberText, { y = ( display.contentHeight * ( 1 / 8 )), time = 1000, transition = easing.inOutExpo, onComplete = prepareChallenge })
+	transition.to( roundNumberText, { y = ( display.contentHeight * ( 1 / 8 )), time = 2000, transition = easing.inOutExpo, onComplete = prepareChallenge })
 
 	Runtime:addEventListener( "enterFrame", onEnterFrame )
 end
@@ -173,7 +173,7 @@ onEnterFrame = function( event )
 		if threshold < 0 then threshold = 0 end
 
 		if styleIndex == 1 then -- MAXIMIZE
-			local scalarMovement = ( currentAccel / 0.6 ) + ( currentGyro / 10 )
+			local scalarMovement = ( currentAccel / 0.5 ) + ( currentGyro / 10 )
 			
 			--print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
 			

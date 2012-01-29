@@ -100,7 +100,7 @@ processPlayer = function()
 
 	local limb = storyboard.players[ playersToDismember[ playerIndex ] ]:removeLimb()
 	limbText.text = "Eskimo "..( playersToDismember[ playerIndex ] ).." Lost "..limb
-	limbTextTransition = transition.to( limbText, { alpha = 1, time = 500, delay = 1000, onComplete = 
+	limbTextTransition = transition.to( limbText, { alpha = 1, time = 500, delay = 500, onComplete = 
 							function( obj ) transition.to( obj, { alpha = 0, time = 500, delay = 3000 }) end })
 	playerIndex = playerIndex + 1
 end

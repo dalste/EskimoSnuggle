@@ -36,6 +36,7 @@ local function startGame()
 	storyboard.goSFX = audio.loadSound( "audio/go.wav" )
 
 	storyboard.gotoScene( "scenes.title" )
+	--storyboard.gotoScene( "scenes.title" )
 end
 
 local fill = display.newRect( screen.left, screen.top, screen.right - screen.left, screen.bottom - screen.top )
