@@ -111,6 +111,33 @@ function player:removeLimb()
 	if severedLimb == self.legRight then return "Left Leg" end
 end
 
+function player:restoreLimb()
+	self.numberOfLimbs = self.numberOfLimbs + 1
+	if self.numberOfLimbs > 4 then self.numberOfLimbs = 4; return; end
+
+	if self.armLeft.alpha == 1.0 then
+		transition.to( self.armLeft, { alpha = 1, time = 500, delay = 500 })
+		self.weakened.alpha = 1
+		transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
+		return "Right Arm"
+	elseif self.armRight.alpha == 1.0 then
+		transition.to( self.armRight, { alpha = 1, time = 500, delay = 500 })
+		self.weakened.alpha = 1
+		transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
+		return "Left Arm"
+	elseif self.legLeft.alpha == 1.0 then 
+		transition.to( self.legLeft, { alpha = 1, time = 500, delay = 500 })
+		self.weakened.alpha = 1
+		transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
+		return "Right Leg"
+	elseif self.legRight.alpha == 1.0 then
+		transition.to( self.legRight, { alpha = 1, time = 500, delay = 500 })
+		self.weakened.alpha = 1
+		transition.to( self.weakened, { alpha = 0, time = 3000, delay = 500 })
+		return "Left Leg"
+	end
+end
+
 function player:destroy()
 	self.group:removeSelf()
 	self.skull:removeSelf()

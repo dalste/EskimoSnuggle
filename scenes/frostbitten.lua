@@ -1,3 +1,6 @@
+require "ice"
+local limbBox = ice:loadBox( "limbs" )
+
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
@@ -18,6 +21,9 @@ function scene:createScene( event )
 end
 
 function scene:enterScene( event )
+	limbBox:store( ""..storyboard.currentRound, 1 )
+	limbBox:save()
+
 	frostbittenText.x = display.contentWidth / 2
 	frostbittenText.y = 0 - frostbittenText.contentHeight
 	frostbittenText.alpha = 1

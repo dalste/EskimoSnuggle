@@ -1,3 +1,6 @@
+require "ice"
+local limbBox = ice:loadBox( "limbs" )
+
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
@@ -33,7 +36,19 @@ function scene:destroyScene( event )
 end
 
 onTap = function( event )
-	transition.to( roundWonText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.round" ) end })
+	local needALimb = false
+
+	for i = 1, #storyboard.players do
+		if storyboard.players[ i ].numberOfLimbs < 4 then needALimb = true end
+	end
+
+	local frozenLimbs = limbBox:retrieve( ""..storyboard.currentRound )
+
+	if needALimb == true and frozenLimbs ~= nil and frozenLimbs > 0 then
+			transition.to( roundWonText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.foundlimb" ) end })
+	else
+		transition.to( roundWonText, { alpha = 0, time = 500, onComplete = function() storyboard.gotoScene( "scenes.round" ) end })
+	end
 end
 
 scene:addEventListener( "createScene", scene )
