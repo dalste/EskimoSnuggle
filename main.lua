@@ -20,7 +20,7 @@ local screen =
 
 local function startGame()
 	local storyboard = require "storyboard"
-	storyboard.gotoScene( "scenes.title" )
+	storyboard.gotoScene( "scenes.playerselect" )
 end
 
 local fill = display.newRect( screen.left, screen.top, screen.right - screen.left, screen.bottom - screen.top )

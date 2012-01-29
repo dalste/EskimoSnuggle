@@ -12,7 +12,7 @@ function scene:createScene( event )
 	environmentSheet = sprite.newSpriteSheetFromData( "textures/environment".._G.filenameSuffix..".png", 
 							require( "textures.environment".._G.filenameSuffix ).getSpriteSheetData() )
 
-	titleSprite = sprite.newSprite( sprite.newSpriteSet( environmentSheet, 8, 1 ))
+	titleSprite = sprite.newSprite( sprite.newSpriteSet( environmentSheet, 9, 1 ))
 	titleSprite.xScale = _G.spriteScale
 	titleSprite.yScale = _G.spriteScale
 	titleSprite.x = display.contentWidth / 2

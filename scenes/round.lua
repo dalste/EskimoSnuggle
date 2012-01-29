@@ -2,11 +2,16 @@ local sprite = require "sprite"
 local storyboard = require "storyboard"
 local scene = storyboard.newScene()
 
-local uiSheet
-local verbSprite, styleSprite, timerSprite
+local feedbackFlashCount, currentState, styleIndex
+local onEnterFrame, onAccelerometer, onGyro
 
-local roundNumberText, verbText, styleText, timerText
-local prepareChallenge, startChallenge, updateChallenge
+local roundNumberText, verbText, styleText, hintText
+local feedbackGroup, feedbackLeftText, feedbackRightText, exclamationLeftText, exclamationRightText
+local prepareChallenge, startChallenge, updateChallenge, flashFeedback, postFlashFeedback
+
+local currentAccel, currentGyro, threshold
+
+local previousTime, previousOffence
 
 local verbs =
 {
@@ -30,99 +35,181 @@ local verbs =
 local styles =
 {
 	"Wildly",
-	"Slowly",
 	"Cautiously"
+}
+
+local hints =
+{
+	"(Maximize Movement)",
+	"(Minimize Movement)"
 }
 
 function scene:createScene( event )
 	local group = self.view
 
-	uiSheet = sprite.newSpriteSheetFromData( "textures/ui".._G.filenameSuffix..".png", 
-							require( "textures.ui".._G.filenameSuffix ).getSpriteSheetData() )
-	
-	verbSprite = sprite.newSprite( sprite.newSpriteSet( uiSheet, 2, 1 ) )
-	verbSprite.xScale = _G.spriteScale
-	verbSprite.yScale = _G.spriteScale
-	verbSprite.x = ( display.contentWidth / 4 )
-	verbSprite.y = 0 - verbSprite.contentHeight
-	group:insert( verbSprite )
-
-	styleSprite = sprite.newSprite( sprite.newSpriteSet( uiSheet, 2, 1 ) )
-	styleSprite.xScale = _G.spriteScale
-	styleSprite.yScale = _G.spriteScale
-	styleSprite.x = ( display.contentWidth / 2 )
-	styleSprite.y = 0 - styleSprite.contentHeight
-	group:insert( styleSprite )
-
-	timerSprite = sprite.newSprite( sprite.newSpriteSet( uiSheet, 1, 1 ) )
-	timerSprite.xScale = _G.spriteScale
-	timerSprite.yScale = _G.spriteScale
-	timerSprite.x = ( display.contentWidth * ( 3 / 4 ))
-	timerSprite.y = 0 - timerSprite.contentHeight
-	group:insert( timerSprite )
-
-	roundNumberText = display.newRetinaText( "Round "..storyboard.currentRound, 25, 25, native.systemFont, 16 )
-	roundNumberText:setTextColor( 255, 255, 255 )
+	roundNumberText = display.newRetinaText( "Round "..storyboard.currentRound, 0, 0, "Cubano", 24 )
+	roundNumberText.x = display.contentWidth / 2
+	roundNumberText.y = 0 - roundNumberText.contentHeight
+	roundNumberText:setTextColor( 65, 132, 187 )
 	group:insert( roundNumberText )
 
-	verbText = display.newRetinaText( "", 100, 0, native.systemFont, 16 )
-	verbText:setTextColor( 25, 25, 25 )
+	verbText = display.newRetinaText( "", 0, 0, "Cubano", 48 )
+	verbText:setTextColor( 65, 132, 187 )
 	group:insert( verbText )
 
-	styleText = display.newRetinaText( "", 0, 0, native.systemFont, 16 )
-	styleText:setTextColor( 25, 25, 25 )
+	styleText = display.newRetinaText( "", 0, 0, "Cubano", 48 )
+	styleText:setTextColor( 65, 132, 187 )
 	group:insert( styleText )
 
-	timerText = display.newRetinaText( "", 0, 0, native.systemFont, 16 )
-	timerText:setTextColor( 25, 25, 25 )
-	group:insert( timerText )
+	hintText = display.newRetinaText( "", 0, 0, "Cubano", 16 )
+	hintText:setTextColor( 65, 132, 187 )
+	group:insert( hintText )
+
+	feedbackGroup = display.newGroup()
+
+	feedbackLeftText = display.newRetinaText( "Get Ready", 0, display.contentHeight / 2.5, "Cubano", 14 )
+	feedbackLeftText.x = display.contentWidth / 8
+	feedbackLeftText:setTextColor( 65, 132, 187 )
+	feedbackGroup:insert( feedbackLeftText )
+
+	feedbackRightText = display.newRetinaText( "Get Ready", 0, display.contentHeight / 2.5, "Cubano", 14 )
+	feedbackRightText.x = display.contentWidth - ( display.contentWidth / 8 )
+	feedbackRightText:setTextColor( 65, 132, 187 )
+	feedbackGroup:insert( feedbackRightText )
+
+	exclamationLeftText = display.newRetinaText( "!", 0, display.contentHeight / 2.5, "Cubano", 64 )
+	exclamationLeftText.x = display.contentWidth / 8
+	exclamationLeftText:setTextColor( 65, 132, 187 )
+	feedbackGroup:insert( exclamationLeftText )
+
+	exclamationRightText = display.newRetinaText( "!", 0, display.contentHeight / 2.5, "Cubano", 64 )
+	exclamationRightText.x = display.contentWidth - ( display.contentWidth / 8 )
+	exclamationRightText:setTextColor( 65, 132, 187 )
+	feedbackGroup:insert( exclamationRightText )
+
+	feedbackGroup.alpha = 0
+
+	group:insert( feedbackGroup )
 end
 
 function scene:enterScene( event )
-	timer.performWithDelay( 1000, prepareChallenge )
+	currentState = 0
+	feedbackFlashCount = 3
+	currentAccel = 0
+	currentGyro = 0
+	threshold = 0
+	previousTime = system.getTimer()
+
+	transition.to( roundNumberText, { y = ( display.contentHeight * ( 1 / 8 )), time = 1000, transition = easing.inOutExpo, onComplete = prepareChallenge })
+
+	Runtime:addEventListener( "enterFrame", onEnterFrame )
 end
 
 function scene:exitScene( event )
-
+	Runtime:removeEventListener( "enterFrame", onEnterFrame )
 end
 
 function scene:destroyScene( event )
 
 end
 
+onEnterFrame = function( event )
+	local dt = ( event.time - previousTime ) / 1000
+	previousTime = event.time
+	
+	if currentState == 0 and feedbackFlashCount == 0 then
+		currentState = 1
+		flashFeedbackCount = 1
+		feedbackLeftText.text = "Go"
+		feedbackRightText.text = "Go"
+		flashFeedback( feedbackGroup )
+	elseif currentState == 1 then
+		currentState = 2
+		previousOffence = event.time
+		local ultimote = require "Ultimote"; ultimote.connect();
+		Runtime:addEventListener( "accelerometer", onAccelerometer )
+		Runtime:addEventListener( "gyroscope", onGyro )
+	elseif currentState == 2 then
+		threshold = threshold - ( 5 * dt )
+		if threshold < 0 then threshold = 0 end
+
+		if styleIndex == 1 then -- MAXIMIZE
+			local scalarMovement = ( currentAccel / 0.6 ) + ( currentGyro / 12.5 )
+			print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			if scalarMovement <= 1.0 then
+				local punishment = 25 * ( ( event.time - previousOffence ) / 1000 )
+				if punishment > 25 then punishment = 25 end
+				threshold = threshold + punishment
+				previousOffence = event.time
+				print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
+			end
+		elseif styleIndex == 2 then -- MINIMIZE
+			local scalarMovement = ( currentAccel / 0.6 ) + ( currentGyro / 12.5 )
+			print( "MINIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			if scalarMovement >= 1.0 then
+				local punishment = 25 * ( ( event.time - previousOffence ) / 1000 )
+				if punishment > 25 then punishment = 25 end
+				threshold = threshold + punishment
+				previousOffence = event.time
+				print( "PUNISHED! THRESHOLD = "..threshold..", PUNISHMENT = "..punishment)
+			end
+		end
+
+		if threshold >= 100 then print ("~~~~~~~~~~~~~~~~~~~~~~~~~~ROUND OVER"); threshold = 0 end
+	end
+end
+
+onAccelerometer = function( event )
+	currentAccel = ( ( math.abs( event.xInstant ) + math.abs( event.yInstant ) + math.abs( event.zInstant ) ) / 3 )
+end
+
+onGyro = function( event )
+	currentGyro = ( ( math.abs( event.xRotation ) + math.abs( event.yRotation ) + math.abs( event.zRotation ) ) / 3 )
+end
+
 prepareChallenge = function()
 	verbText.text = verbs[ math.random( 1, #verbs )]
-	verbText.x = verbSprite.x
-	verbText.y = verbSprite.y
+	verbText.x = display.contentWidth / 2
+	verbText.y = 0 - verbText.contentHeight
 
-	styleText.text = styles[ math.random( 1, #styles )]
-	styleText.x = styleSprite.x
-	styleText.y = styleSprite.y
-
-	timerText.text = "Get Ready..."
-	timerText.x = timerSprite.x
-	timerText.y = timerSprite.y
-
-	transition.to( roundNumberText, { x = 0 - roundNumberText.contentWidth, time = 1000, transition = easing.inOutExpo })
+	styleIndex = math.random( 1, #styles )
 	
-	transition.to( verbSprite, { y = display.contentHeight / 6, time = 1000, transition = easing.inOutExpo })
-	transition.to( verbText, { y = display.contentHeight / 6, time = 1000, transition = easing.inOutExpo })
-	
-	transition.to( styleSprite, { y = display.contentHeight / 6, time = 1000, delay = 200, transition = easing.inOutExpo })
-	transition.to( styleText, { y = display.contentHeight / 6, time = 1000, delay = 200, transition = easing.inOutExpo })
-	
-	transition.to( timerSprite, { y = display.contentHeight / 6, time = 1000, delay = 400 ,  transition = easing.inOutExpo })
-	transition.to( timerText, { y = display.contentHeight / 6, time = 1000, delay = 400 ,  transition = easing.inOutExpo })
+	styleText.text = styles[ styleIndex ]
+	styleText.x = display.contentWidth / 2
+	styleText.y = 0 - styleText.contentHeight
 
-	timer.performWithDelay( 5000, startChallenge )
+	hintText.text = hints[ styleIndex ]
+	hintText.x = display.contentWidth / 2
+	hintText.y = 0 - styleText.contentHeight
+
+	transition.to( roundNumberText, { y = 0 - roundNumberText.contentHeight, time = 1000, transition = easing.inOutExpo })
+	
+	--transition.to( bubbleSprite, { y = display.contentHeight / 4, time = 1000, transition = easing.inOutExpo })
+	transition.to( verbText, { y = display.contentHeight / 8, time = 1000, delay = 200, transition = easing.inOutExpo })
+	transition.to( styleText, { y = display.contentHeight / 4, time = 1000, delay = 400, transition = easing.inOutExpo })
+	transition.to( hintText, { y = display.contentHeight / 2.75, time = 1000, delay = 600, transition = easing.inOutExpo })
+
+	flashFeedback( feedbackGroup )
 end
 
 startChallenge = function()
-	timerText.text = "Go!"
 	system.vibrate()
 end
 
 updateChallenge = function()
+end
+
+flashFeedback = function( obj )
+	obj.alpha = 1.0
+	transition.to( obj, { alpha = 0, time = 2000, transition = easing.inExpo, onComplete = postFlashFeedback })
+end
+
+postFlashFeedback = function( obj )
+	feedbackFlashCount = feedbackFlashCount - 1
+
+	if feedbackFlashCount > 0 then
+		flashFeedback( obj )
+	end
 end
 
 scene:addEventListener( "createScene", scene )
