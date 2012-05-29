@@ -18,6 +18,7 @@ local screen =
 	bottom = display.contentHeight - display.screenOriginY
 };
 
+
 audio.reserveChannels( 1 )
 local backgroundMusic = audio.loadSound( "audio/partyDog.mp3" )
 local backgroundMusicChannel = audio.play( backgroundMusic, { channel = 1, loops = -1 }  )
@@ -54,19 +55,24 @@ environmentSprite.y = display.contentHeight + environmentSprite.contentHeight
 
 transition.to( environmentSprite, { y = ( display.contentHeight * ( 3 / 4 )), time = 1000, transition = easing.inOutExpo, onComplete = startGame })
 
-
-
---local ultimote = require "Ultimote"; ultimote.connect();
-
 --[[
+local ultimote = require "Ultimote"; ultimote.connect();
+
+local currentRotation, currentAcceleration = 0, 0
 function onShake( event )
-	print( event.yInstant ) --..", "..event.yGravity..", "..event.zGravity.." -- "..event.xInstant..", "..event.yInstant..", "..event.zInstant )
+	currentAcceleration = math.abs( event.xInstant ) + math.abs( event.yInstant ) + math.abs( event.zInstant )
 end
 
 function onGyro( event )
-	print( event.zRotation )
+	currentRotation = math.abs( event.xRotation * event.deltaTime ) + math.abs( event.yRotation * event.deltaTime ) + 
+							math.abs( event.zRotation * event.deltaTime )
 end
-]]
 
---Runtime:addEventListener( "accelerometer", onShake )
---Runtime:addEventListener( "gyroscope", onGyro )
+function update( event )
+	print("A: "..currentAcceleration..", G: "..currentRotation)
+end
+
+Runtime:addEventListener( "accelerometer", onShake )
+Runtime:addEventListener( "gyroscope", onGyro )
+Runtime:addEventListener( "enterFrame", update )
+--]]

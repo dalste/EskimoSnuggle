@@ -164,7 +164,7 @@ onEnterFrame = function( event )
 		
 		--local ultimote = require "Ultimote"; ultimote.connect();
 		
-		winChallengeTimer = timer.performWithDelay( 18000, winChallenge )
+		winChallengeTimer = timer.performWithDelay( 15000, winChallenge )
 
 		Runtime:addEventListener( "accelerometer", onAccelerometer )
 		Runtime:addEventListener( "gyroscope", onGyro )
@@ -175,7 +175,7 @@ onEnterFrame = function( event )
 		if styleIndex == 1 then -- MAXIMIZE
 			local scalarMovement = ( currentAccel / 0.5 ) + ( currentGyro / 7.0 )
 			
-			--print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
+			print( "MAXIMIZING: ", scalarMovement..", ACCEL: "..(currentAccel / 0.6)..", GYRO: "..(currentGyro / 12.5))
 			
 			if scalarMovement <= 1.0 then
 				if flashFeedbackCount <= 0 then
@@ -230,7 +230,7 @@ prepareChallenge = function()
 	verbText.y = 0 - verbText.contentHeight
 	verbText.alpha = 1
 
-	styleIndex = math.random( 1, #styles )
+	styleIndex = 1 math.random( 1, #styles )
 	
 	styleText.text = styles[ styleIndex ]
 	styleText.x = display.contentWidth / 2
